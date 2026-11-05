@@ -148,6 +148,9 @@ minimum replicas 0/maximum 1, the three variables and resource-scoped publisher
 role before the first ZIP deployment. It deliberately disables **visitor
 authentication** for these public, synthetic controls. This does not disable
 authenticated Application Insights ingestion or Azure RBAC for management.
+The monitoring module passes the connection string through a secure output,
+so app configuration waits for the component and does not expose that value
+in deployment history.
 Review this public-access choice before provisioning; do not apply this
 template over an existing app or shared resources.
 
