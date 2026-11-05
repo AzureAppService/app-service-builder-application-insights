@@ -28,7 +28,14 @@ jobs:
         run: dotnet publish BuilderApplicationInsightsSample.csproj --no-restore -c Release
       - name: Check formatting
         run: dotnet format whitespace tests/Sample.Tests.csproj --no-restore --verify-no-changes --verbosity quiet
-      - name: Compile monitoring and source-free app templates
+      - name: Compile templates and verify secure configuration dependency
         run: |
+          set -euo pipefail
           az bicep build --file infra/main.bicep --stdout > /dev/null
-          az bicep build --file infra/sample.bicep --stdout > /dev/null
+          az bicep build --file infra/sample.bicep --stdout | jq -e '
+            .resources.monitoring.properties.template.outputs.applicationInsightsConnectionString.type == "securestring"
+            and (.resources.app.dependsOn | index("monitoring") != null)
+            and (.resources.app.properties.versionConfiguration.variables[]
+              | select(.name == "APPLICATIONINSIGHTS_CONNECTION_STRING")
+              | .value | startswith("[listOutputsWithSecureValues("))
+          ' > /dev/null
