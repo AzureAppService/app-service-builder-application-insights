@@ -1,0 +1,9 @@
+components:
+  - name: web
+    role: web
+    platform: dotnet
+    platformVersion: "10"
+    run:
+      start: dotnet BuilderApplicationInsightsSample.dll
+      port: 8080
+      healthCheckPath: /health

@@ -1,0 +1,29 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
+    cooldown:
+      default-days: 7
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      dotnet:
+        patterns: ["*"]
+    cooldown:
+      default-days: 7
+  - package-ecosystem: nuget
+    directory: /tests
+    schedule:
+      interval: weekly
+    groups:
+      dotnet-tests:
+        patterns: ["*"]
+    cooldown:
+      default-days: 7

@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light" />
+    <title>Signal lab | Application Insights</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/style.css" />
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to demonstrations</a>
+    <header>
+      <a class="brand" href="/"
+        >Signal<span>lab</span><span class="brand-dot" aria-hidden="true"></span
+      ></a>
+      <span class="platform">APP SERVICE BUILDER</span>
+    </header>
+    <main id="main">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">
+            APPLICATION INSIGHTS / SERVER-SIDE OPENTELEMETRY
+          </p>
+          <h1>Make every request<br /><em>tell its story.</em></h1>
+          <p class="intro">
+            Explore a successful request, a little latency, an intentional
+            error, and a real HTTP dependency. Follow each signal from this app
+            into Azure.
+          </p>
+          <p class="environment" id="environment">
+            Reading sample configuration...
+          </p>
+        </div>
+        <aside class="flow" aria-label="Telemetry flow">
+          <span class="flow-kicker">ONE REQUEST. CONNECTED SIGNALS.</span>
+          <div class="flow-node">
+            <span class="node-index">01</span>
+            <div>
+              <strong>Your request</strong
+              ><small>Choose one synthetic scenario</small>
+            </div>
+          </div>
+          <span class="flow-line" aria-hidden="true"></span>
+          <div class="flow-node">
+            <span class="node-index">02</span>
+            <div>
+              <strong>Server instrumentation</strong
+              ><small>Request, trace, exception, dependency</small>
+            </div>
+          </div>
+          <span class="flow-line" aria-hidden="true"></span>
+          <div class="flow-node">
+            <span class="node-index">03</span>
+            <div>
+              <strong>Application Insights</strong
+              ><small>Managed identity authenticates ingestion</small>
+            </div>
+          </div>
+          <p>
+            Shared operation IDs connect the journey. The browser does not
+            export telemetry.
+          </p>
+        </aside>
+      </section>
+      <section aria-labelledby="scenarios-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">TRY A SIGNAL</p>
+            <h2 id="scenarios-title">Small requests. Useful answers.</h2>
+          </div>
+          <span class="badge">Synthetic data only</span>
+        </div>
+        <div class="cards">
+          <article class="card success">
+            <span class="card-number">01 / REQUEST</span>
+            <div class="symbol" aria-hidden="true">200</div>
+            <h3>The happy path</h3>
+            <p>
+              A successful request and a correlated server trace. Your baseline
+              for everything else.
+            </p>
+            <button data-scenario="success">
+              Send successful request <span aria-hidden="true">&#8599;</span>
+            </button>
+          </article>
+          <article class="card slow">
+            <span class="card-number">02 / LATENCY</span>
+            <div class="symbol" aria-hidden="true">600<span>ms</span></div>
+            <h3>Take a little longer</h3>
+            <p>
+              A fixed, asynchronous 600 ms pause. See duration without running a
+              load test.
+            </p>
+            <button data-scenario="slow">
+              Send slow request <span aria-hidden="true">&#8599;</span>
+            </button>
+          </article>
+          <article class="card error">
+            <span class="card-number">03 / EXCEPTION</span>
+            <div class="symbol" aria-hidden="true">500</div>
+            <h3>A failure, on purpose</h3>
+            <p>
+              A real, handled synthetic exception. The response is 500; the app
+              stays healthy.
+            </p>
+            <button data-scenario="error">
+              Send intentional error <span aria-hidden="true">&#8599;</span>
+            </button>
+          </article>
+          <article class="card dependency">
+            <span class="card-number">04 / DEPENDENCY</span>
+            <div class="symbol" aria-hidden="true">HTTP</div>
+            <h3>Follow the next hop</h3>
+            <p>
+              One real HTTP call to this app's loopback catalog. Same process,
+              not an external service.
+            </p>
+            <button data-scenario="dependency">
+              Call loopback catalog <span aria-hidden="true">&#8599;</span>
+            </button>
+          </article>
+        </div>
+      </section>
+      <section class="results" aria-labelledby="results-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">REQUEST NOTEBOOK</p>
+            <h2 id="results-title">Your latest signal</h2>
+          </div>
+          <span id="request-status" role="status" aria-live="polite"
+            >Ready when you are</span
+          >
+        </div>
+        <div class="empty" id="empty">
+          <span aria-hidden="true">&#8593;</span>
+          <p>
+            Choose a scenario above.<br /><small
+              >Results reflect actual HTTP responses, not Azure ingestion
+              status.</small
+            >
+          </p>
+        </div>
+        <div id="result" hidden>
+          <dl class="stats">
+            <div>
+              <dt>HTTP status</dt>
+              <dd id="http-status"></dd>
+            </div>
+            <div>
+              <dt>Server duration</dt>
+              <dd id="duration"></dd>
+            </div>
+            <div>
+              <dt>Scenario</dt>
+              <dd id="scenario"></dd>
+            </div>
+          </dl>
+          <p id="message"></p>
+          <div class="operation">
+            <span>OPERATION ID</span><code id="operation-id"></code
+            ><button id="copy">Copy ID</button>
+          </div>
+        </div>
+      </section>
+      <section class="learn">
+        <div>
+          <p class="eyebrow">CONNECT THE DOTS</p>
+          <h2>Verify in Azure, not by guesswork.</h2>
+          <p>
+            Open your Application Insights logs and search the operation ID.
+            Requests, exceptions, traces and dependencies should share it.
+            Configuration and SDK startup alone do not prove ingestion.
+          </p>
+        </div>
+        <div class="query">
+          <span>APPLICATION INSIGHTS / LOGS</span>
+          <pre><code>union requests, exceptions,
+  traces, dependencies
+| where operation_Id == "PASTE_ID"
+| order by timestamp asc</code></pre>
+          <p>
+            Allow a few minutes for ingestion. Follow the README for identity,
+            RBAC and workspace verification.
+          </p>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <span>Signal lab / Development &amp; testing only</span
+      ><span
+        >12 requests per minute &middot; 2 concurrent &middot; No browser
+        telemetry</span
+      >
+    </footer>
+  </body>
+</html>
