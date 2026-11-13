@@ -16,6 +16,20 @@ using OpenTelemetry.Trace;
 
 public static class SampleTelemetry
 {
+    public static bool ValidConnection(string connection)
+    {
+        var parts = connection.Split(';', StringSplitOptions.RemoveEmptyEntries)
+            .Select(part => part.Split('=', 2)).ToArray();
+        var key = parts.FirstOrDefault(part => part.Length == 2 && part[0].Equals("InstrumentationKey", StringComparison.OrdinalIgnoreCase));
+        var endpoint = parts.FirstOrDefault(part => part.Length == 2 && part[0].Equals("IngestionEndpoint", StringComparison.OrdinalIgnoreCase));
+        return parts.All(part => part.Length == 2) &&
+            parts.Select(part => part[0]).Distinct(StringComparer.OrdinalIgnoreCase).Count() == parts.Length &&
+            key is not null && Guid.TryParse(key[1], out _) &&
+            endpoint is not null && Uri.TryCreate(endpoint[1], UriKind.Absolute, out var uri) &&
+            uri.Scheme == Uri.UriSchemeHttps && string.IsNullOrEmpty(uri.UserInfo) &&
+            string.IsNullOrEmpty(uri.Query) && string.IsNullOrEmpty(uri.Fragment);
+    }
+
     public static void Configure(WebApplicationBuilder builder, bool hosted)
     {
         var diagnostics = new TelemetryDiagnostics();
@@ -175,21 +189,68 @@ public sealed class TelemetryDiagnostics
     private int lastIngestionStatus;
     private int exporterEvents;
     private int lastExporterEvent;
+    private long lastResponseTicks;
+    private long lastWarningTicks;
 
     public void RecordTokenRequest() => Interlocked.Increment(ref tokenRequests);
-    public void RecordTokenSuccess() => Interlocked.Increment(ref tokenSuccesses);
+    public void RecordTokenSuccess()
+    {
+        Interlocked.Increment(ref tokenSuccesses);
+        Volatile.Write(ref credentialFailure, null);
+    }
     public void RecordCredentialFailure(string code) => Volatile.Write(ref credentialFailure, code);
 
     public void RecordIngestionResponse(int status)
     {
         Interlocked.Increment(ref ingestionResponses);
         Volatile.Write(ref lastIngestionStatus, status);
+        Volatile.Write(ref lastResponseTicks, DateTimeOffset.UtcNow.UtcTicks);
     }
 
     public void RecordExporterEvent(int eventId)
     {
         Interlocked.Increment(ref exporterEvents);
         Volatile.Write(ref lastExporterEvent, eventId);
+        Volatile.Write(ref lastWarningTicks, DateTimeOffset.UtcNow.UtcTicks);
+    }
+
+    public string Readiness(DateTimeOffset? deadline)
+    {
+        if (deadline is { } expires && DateTimeOffset.UtcNow >= expires)
+        {
+            return "demo_expired";
+        }
+        if (Volatile.Read(ref credentialFailure) is not null)
+        {
+            return "identity_failed";
+        }
+        var status = Volatile.Read(ref lastIngestionStatus);
+        if (status is 401 or 403)
+        {
+            return "ingestion_denied";
+        }
+        if (status == 429)
+        {
+            return "ingestion_limit";
+        }
+        if (status == 206)
+        {
+            return "ingestion_partial";
+        }
+        if (status >= 400)
+        {
+            return "ingestion_failed";
+        }
+        if (Volatile.Read(ref lastWarningTicks) > 0 &&
+            Volatile.Read(ref lastWarningTicks) >= Volatile.Read(ref lastResponseTicks))
+        {
+            return "export_warning";
+        }
+        if (status == 200 && DateTimeOffset.UtcNow.UtcTicks - Volatile.Read(ref lastResponseTicks) < TimeSpan.FromMinutes(5).Ticks)
+        {
+            return "ingestion_accepted";
+        }
+        return "not_checked";
     }
 
     public object Snapshot(bool hosted) => new

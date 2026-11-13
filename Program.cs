@@ -5,12 +5,12 @@ using Microsoft.AspNetCore.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://0.0.0.0:8080");
-var hosted = builder.Configuration["TELEMETRY_MODE"] == "managed-identity";
 var mode = builder.Configuration["TELEMETRY_MODE"];
-if (mode is not null and not "off" and not "managed-identity")
-{
-    throw new InvalidOperationException("TELEMETRY_MODE must be off or managed-identity.");
-}
+var setupCode = mode is null or "off" ? "configuration_missing" :
+    mode != "managed-identity" ? "configuration_invalid" :
+    string.IsNullOrWhiteSpace(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]) ? "configuration_missing" :
+    !SampleTelemetry.ValidConnection(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]!) ? "configuration_invalid" : null;
+var hosted = mode == "managed-identity" && setupCode is null;
 
 DateTimeOffset? deadline = null;
 if (hosted)
@@ -19,9 +19,13 @@ if (hosted)
         builder.Configuration["SAMPLE_EXPIRES_AT"], "yyyy-MM-dd'T'HH:mm:ss'Z'",
         CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var expires))
     {
-        throw new InvalidOperationException("Managed-identity mode requires SAMPLE_EXPIRES_AT in UTC.");
+        setupCode = string.IsNullOrWhiteSpace(builder.Configuration["SAMPLE_EXPIRES_AT"]) ? "configuration_missing" : "configuration_invalid";
+        hosted = false;
     }
-    deadline = expires;
+    else
+    {
+        deadline = expires;
+    }
 }
 
 SampleTelemetry.Configure(builder, hosted);
@@ -74,10 +78,28 @@ app.UseRateLimiter();
 app.MapGet("/health", () => Results.Text("OK\n"));
 app.MapGet("/api/config", () => Results.Json(new
 {
-    mode = hosted ? "Managed identity configured; ingestion must be verified in Azure." : "Local preview; Azure export is off.",
+    mode = hosted ? "Managed identity configured; ingestion must be verified in Azure." : "Azure export is off; this run does not verify ingestion.",
     expiresAt = deadline
 }));
 app.MapGet("/api/diagnostics", () => Results.Json(telemetryDiagnostics.Snapshot(hosted)));
+app.MapGet("/api/setup", () => Results.Json(new
+{
+    code = setupCode ?? telemetryDiagnostics.Readiness(deadline),
+    setupUrl = "./README.md#setup",
+    ingestionVerified = false
+}));
+app.MapGet("/ready", () =>
+{
+    var code = setupCode ?? telemetryDiagnostics.Readiness(deadline);
+    return Results.Json(new { code, ingestionVerified = false },
+        statusCode: code == "ingestion_accepted" ? 200 : 503);
+});
+app.MapGet("/README.md", () =>
+{
+    var text = File.ReadAllText(
+        Path.Combine(app.Environment.ContentRootPath, "README.md"));
+    return Results.Content(SetupPage.Render(text), "text/html");
+});
 app.MapGet("/internal/catalog", (HttpContext context) =>
     context.Connection.RemoteIpAddress is { } address && System.Net.IPAddress.IsLoopback(address)
         ? Results.Json(new { item = "Synthetic notebook", available = true })
