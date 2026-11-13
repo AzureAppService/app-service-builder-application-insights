@@ -77,3 +77,22 @@ document.querySelector("#copy").addEventListener("click", async () => {
 });
 
 configure();
+
+document.querySelector("#health").addEventListener("click", async (event) => {
+  const button = event.currentTarget;
+  const result = document.querySelector("#health-status");
+  button.disabled = true;
+  result.textContent = "Checking /health...";
+  const abort = new AbortController();
+  const timeout = setTimeout(() => abort.abort(), 5000);
+  try {
+    const response = await fetch("/health", { signal: abort.signal });
+    if (!response.ok) throw new Error("Health unavailable");
+    result.textContent = `/health · HTTP ${response.status} · ${await response.text()}. Process ready; Azure ingestion is not verified.`;
+  } catch {
+    result.textContent = "App health could not be checked. Check your connection and retry.";
+  } finally {
+    clearTimeout(timeout);
+    button.disabled = false;
+  }
+});

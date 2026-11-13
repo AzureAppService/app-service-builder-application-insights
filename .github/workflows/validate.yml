@@ -2,7 +2,7 @@ name: Validate Application Insights sample
 
 on:
   push:
-    branches: [main]
+    branches: [main, sample-ux-refresh]
   pull_request:
     branches: [main]
 

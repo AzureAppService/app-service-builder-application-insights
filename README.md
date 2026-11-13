@@ -85,7 +85,12 @@ Excess traffic returns explicit 429 and Retry-After.
 The dashboard below is a **local preview with Azure export off**, not hosted
 ingestion evidence.
 
-![Signal lab dashboard in local telemetry-off mode](screenshots/local-desktop.png)
+![Signal lab at the root route with request scenarios, an operation notebook and an in-page process health check, rendered locally with Azure export off](docs/images/sample.png)
+
+The page lives at `/`. **Check app health** displays the actual `/health` response
+without leaving the lab or downloading a text file; it checks process readiness,
+not ingestion. Expand **Customize this signal lab** for the relevant source files.
+The links name App Service Builder and Application Insights documentation separately.
 
 ## 2. Provision the app, identity and dedicated monitoring
 

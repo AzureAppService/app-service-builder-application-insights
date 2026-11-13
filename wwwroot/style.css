@@ -522,3 +522,24 @@ footer {
     scroll-behavior: auto;
   }
 }
+
+.sample-help {
+  padding-block: 30px;
+  border-top: 1px solid #cbd5d1;
+}
+.sample-help summary { cursor: pointer; padding-block: 12px; font-weight: 600; }
+.sample-help code { overflow-wrap: anywhere; }
+.sample-help button {
+  padding: 12px 18px;
+  border: 1px solid #d5e0d9;
+  border-radius: 6px;
+  background: #f6f9f7;
+  color: #175c42;
+  font-weight: 600;
+}
+.sample-help button:hover { background: #e8f1eb; }
+.sample-help a { color: #175c42; }
+.sample-help a:focus-visible, .sample-help summary:focus-visible {
+  outline: 3px solid #175c42;
+  outline-offset: 4px;
+}
