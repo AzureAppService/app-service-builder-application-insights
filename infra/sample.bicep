@@ -33,7 +33,6 @@ resource app 'Microsoft.Web/builderApps@2026-09-01-preview' = {
     versionConfiguration: {
       variables: [
         { name: 'TELEMETRY_MODE', value: 'managed-identity' }
-        { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.applicationInsightsConnectionString }
         { name: 'SAMPLE_EXPIRES_AT', value: expiresAt }
       ]
     }

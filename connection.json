@@ -1,0 +1,9 @@
+{
+  "name": "monitoring",
+  "type": "appInsights",
+  "resourceId": "/subscriptions/<subscription-id>/resourceGroups/<monitoring-group>/providers/Microsoft.Insights/components/<component>",
+  "managedIdentity": { "type": "SystemAssigned" },
+  "settings": [
+    { "field": "connectionString", "value": "<component-connection-string>", "environmentVariable": "APPLICATIONINSIGHTS_CONNECTION_STRING" }
+  ]
+}
