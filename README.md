@@ -14,6 +14,9 @@ This is the actual local UI, with export off—not a hosted ingestion receipt. O
 
 ## Setup
 
+Use these Portal steps for the existing app, or [CLI and ordered ARM/Bicep setup](docs/connection-automation.md) for terminal configuration and a new source-less app.
+Both require correlated ingestion verification, not only a saved routing value.
+
 Start with your own fork deployed from root `builder.yaml`. Keep that app/source connection. You need Azure CLI/Bicep, resource-management permission in a dedicated monitoring group, role-assignment authority on the new component and separate operator query access.
 
 1. **Create monitoring only.** Set your approved subscription, an existing dedicated service group and unique workspace/component names. From this sample root, review what-if and create:
@@ -55,7 +58,7 @@ Start with your own fork deployed from root `builder.yaml`. Keep that app/source
    | `SAMPLE_EXPIRES_AT` | Your own approved future UTC deadline, `yyyy-MM-ddTHH:mm:ssZ` |
    | `AZURE_CLIENT_ID` | Leave unset; code selects system identity |
 
-   For a variables-based app, remove the old manual connection string without deploying, then save the exact Connections mapping and deploy the complete desired configuration once. Keep routing metadata out of Git, browser code, environment dumps, logs and screenshots. Wait in **Deployments** and confirm the new active version. Saving, a restart or a retained version does not apply the new connection. [connection.json](connection.json) is the complete object; replace component resource ID and routing string. The production catalog advertises Application Insights Connections; qualification of this revision's deployed, correlated ingestion remains pending. The [Connections guide](https://builder.appservice.azure.com/docs/guides/connect-to-services/) covers client availability and ETag-guarded ARM setup. Installed CLI 0.0.2 lacks Connections; its deployment command is:
+   For a variables-based app, remove the old manual connection string without deploying, then save the exact Connections mapping and deploy the complete desired configuration once. Keep routing metadata out of Git, browser code, environment dumps, logs and screenshots. Wait in **Deployments** and confirm the new active version. Saving, a restart or a retained version does not apply the new connection. [connection.json](connection.json) is the complete object; replace component resource ID and routing string. The production catalog advertises Application Insights Connections; qualification of this revision's deployed, correlated ingestion remains pending. The [Connections guide](https://builder.appservice.azure.com/docs/guides/connect-to-services/) covers client availability and ETag-guarded ARM setup. The [CLI/ARM alternatives](docs/connection-automation.md) include the native CLI release prerequisite; its separate deployment command is:
 
    ```bash
    builder app deploy --name "<existing-app>" \

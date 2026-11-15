@@ -3,3 +3,4 @@ obj/
 .env
 appsettings.Local.json
 TestResults/
+.local/
