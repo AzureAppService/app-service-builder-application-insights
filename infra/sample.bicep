@@ -51,6 +51,9 @@ resource visitorAccess 'Microsoft.Web/builderApps/authConfigs@2026-09-01-preview
 }
 
 resource publisher 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  dependsOn: [
+    monitoring
+  ]
   name: guid(applicationInsights.id, app.id, 'Monitoring Metrics Publisher')
   scope: applicationInsights
   properties: {
