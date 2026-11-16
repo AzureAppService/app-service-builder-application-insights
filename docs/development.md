@@ -42,6 +42,6 @@ Historical hosted captures in `screenshots/hosted-*.png` show an earlier design 
 
 ## Template boundaries
 
-Use `infra/main.bicep` for **monitoring only** after app deployment. `infra/sample.bicep` is a separate new/source-less app template and explicitly cannot update an existing app; do not apply it to the recommended journey. No template/Portal provisioning integration or runtime picker was added.
+Use `infra/main.bicep` for **monitoring only** after app deployment. `infra/sample.bicep` is a separate new/source-less app template and explicitly cannot update an existing app; do not apply it to the recommended journey. It no longer injects a manual routing variable. Once that new app's identity has committed identifiers, save the dedicated `appInsights` connection using `connection.json`, then attach source and deploy. Selecting an identity in a connection before the app assignment exists is invalid; the template is not a connection orchestrator.
 
 The approved target authentication child is `/authConfigs/default`. The inspected local Builder CLI 0.0.2 bundle still contains `/authConfigs/current`; its auth writes need correction before use. The recommended journey does not change platform auth or copy either historical REST example. Visitor auth is separate from exporter identity.

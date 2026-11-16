@@ -34,8 +34,15 @@ jobs:
           az bicep build --file infra/main.bicep --stdout > /dev/null
           az bicep build --file infra/sample.bicep --stdout | jq -e '
             .resources.monitoring.properties.template.outputs.applicationInsightsConnectionString.type == "securestring"
-            and (.resources.app.dependsOn | index("monitoring") != null)
-            and (.resources.app.properties.versionConfiguration.variables[]
-              | select(.name == "APPLICATIONINSIGHTS_CONNECTION_STRING")
-              | .value | startswith("[listOutputsWithSecureValues("))
+            and (.resources.publisher.dependsOn | index("monitoring") != null)
+            and (.resources.app.identity.type == "SystemAssigned")
+            and (.resources.app.properties.versionConfiguration.variables |
+              all(.name != "APPLICATIONINSIGHTS_CONNECTION_STRING"))
           ' > /dev/null
+          jq -e '
+            .type == "appInsights"
+            and .managedIdentity.type == "SystemAssigned"
+            and (.settings | length == 1)
+            and .settings[0].field == "connectionString"
+            and .settings[0].environmentVariable == "APPLICATIONINSIGHTS_CONNECTION_STRING"
+          ' connection.json > /dev/null

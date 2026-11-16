@@ -33,7 +33,6 @@ resource app 'Microsoft.Web/builderApps@2026-09-01-preview' = {
     versionConfiguration: {
       variables: [
         { name: 'TELEMETRY_MODE', value: 'managed-identity' }
-        { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: monitoring.outputs.applicationInsightsConnectionString }
         { name: 'SAMPLE_EXPIRES_AT', value: expiresAt }
       ]
     }
@@ -52,6 +51,9 @@ resource visitorAccess 'Microsoft.Web/builderApps/authConfigs@2026-09-01-preview
 }
 
 resource publisher 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  dependsOn: [
+    monitoring
+  ]
   name: guid(applicationInsights.id, app.id, 'Monitoring Metrics Publisher')
   scope: applicationInsights
   properties: {

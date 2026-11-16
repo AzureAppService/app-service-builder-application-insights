@@ -2,7 +2,7 @@
 
 An ASP.NET Core/.NET 10 signal lab. Four bounded synthetic scenarios produce actual server-side HTTP traces; Application Insights export uses the app's system-assigned managed identity.
 
-**External-service setup is manual.** Builder's create-from-template experience does not create or connect monitoring. Follow [setup](#setup) to connect a component/workspace to your **already deployed app**, without creating a duplicate app. Configuration or UI counters are not proof of ingestion.
+**Connect existing monitoring through Builder Connections.** The template wizard does not provision a component/workspace. Follow [setup](#setup) for your **already deployed app**, without creating a duplicate app. Configuration or UI counters are not proof of ingestion.
 
 **Private Preview, development/test only.** Use approved Builder access and a supported .NET 10 target. Azure hosting and monitoring incur separate charges. Retained historical demo windows are expired; do not renew another owner's resources.
 
@@ -13,6 +13,9 @@ An ASP.NET Core/.NET 10 signal lab. Four bounded synthetic scenarios produce act
 This is the actual local UI, with export off—not a hosted ingestion receipt. Official .NET/Builder marks, ecosystem links, inline health, result notebook and customization remain. Synthetic HTTP results do not prove Azure delivery; no browser SDK exports telemetry.
 
 ## Setup
+
+Use these Portal steps for the existing app, or [CLI and ordered ARM/Bicep setup](docs/connection-automation.md) for terminal configuration and a new source-less app.
+Both require correlated ingestion verification, not only a saved routing value.
 
 Start with your own fork deployed from root `builder.yaml`. Keep that app/source connection. You need Azure CLI/Bicep, resource-management permission in a dedicated monitoring group, role-assignment authority on the new component and separate operator query access.
 
@@ -45,16 +48,17 @@ Start with your own fork deployed from root `builder.yaml`. Keep that app/source
    ```
 
    This component-scoped role authorizes ingestion, not workspace queries. Do not grant the app Owner/Contributor or subscription-wide access. Give your human operator **Log Analytics Reader** on the dedicated workspace if needed for Logs. Allow role propagation.
-3. **Connect and deploy a new app version.** Open your component's **Overview**, copy its connection string directly to your existing Builder app's **Variables > Add variables**, and set:
+3. **Save a monitoring connection, then deploy.** In the existing app's **Connections**, add **Application Insights**, select the new component and the app's system-assigned **Managed identity**, then retain `APPLICATIONINSIGHTS_CONNECTION_STRING` as the connection-string mapping. It is routing metadata, not authentication. The server exporter still acquires its own Entra token; a browser SDK cannot use managed identity.
+
+   Keep only these separate controls in **Variables**:
 
    | Variable | Value |
    |---|---|
    | `TELEMETRY_MODE` | `managed-identity` |
-   | `APPLICATIONINSIGHTS_CONNECTION_STRING` | New component's connection string |
    | `SAMPLE_EXPIRES_AT` | Your own approved future UTC deadline, `yyyy-MM-ddTHH:mm:ssZ` |
    | `AZURE_CLIENT_ID` | Leave unset; code selects system identity |
 
-   The connection string identifies the destination; it is **not authentication**. Keep it out of Git, browser code, environment dumps, logs and screenshots. Choose **Save and deploy**, wait in **Deployments** and confirm the newly built active version. **Save only**, a restart or a retained old version does not capture changed variables. If save succeeded but deploy did not start, request a new source build, not a duplicate app. Optional installed Builder CLI:
+   For a variables-based app, remove the old manual connection string without deploying, then save the exact Connections mapping and deploy the complete desired configuration once. Keep routing metadata out of Git, browser code, environment dumps, logs and screenshots. Wait in **Deployments** and confirm the new active version. Saving, a restart or a retained version does not apply the new connection. [connection.json](connection.json) is the complete object; replace component resource ID and routing string. The production catalog advertises Application Insights Connections; qualification of this revision's deployed, correlated ingestion remains pending. The [Connections guide](https://builder.appservice.azure.com/docs/guides/connect-to-services/) covers client availability and ETag-guarded ARM setup. The [CLI/ARM alternatives](docs/connection-automation.md) include the native CLI release prerequisite; its separate deployment command is:
 
    ```bash
    builder app deploy --name "<existing-app>" \
