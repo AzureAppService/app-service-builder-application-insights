@@ -107,7 +107,7 @@ The root manifest retains .NET 10, port 8080 and `/health` as liveness. Customiz
 
 ## References
 
-- [Builder Application Insights guide](https://builder.appservice.azure.com/docs/guides/application-insights/).
+- [Builder Application Insights guide](https://builder.appservice.azure.com/docs/tutorials/application-insights/).
 - [Azure Monitor OpenTelemetry](https://learn.microsoft.com/azure/azure-monitor/app/opentelemetry-enable).
 - [Application Insights Entra authentication](https://learn.microsoft.com/azure/azure-monitor/app/azure-ad-authentication).
 - [Official .NET brand sources](https://github.com/dotnet/brand); local unmodified artwork/license in `wwwroot/assets/`. Builder's supplied mark is retained; trademarks belong to their owners.
